@@ -40,10 +40,12 @@ se3306-exp1/
    pnpm run dev 后访问 http://localhost:5173，页面显示 10 篇文章。
 
 右键 → 查看网页源代码，<div id="app"> 内为空，正文不可见。
+![CSR 页面](images/csr-1.png)
+[](images/csr-2.png)
+[](images/csr-3.png)
+![CSR LCP](images/csr-LCP.png)
 
 DevTools Network 面板能看到 main.js 请求。
-
-![alt text](csr-3.png) ![alt text](csr-1.png) ![alt text](csr-2.png)
 
 4. 适用场景及理由
    适用场景：后台管理系统、重交互 SPA。
@@ -60,49 +62,6 @@ DevTools Network 面板能看到 main.js 请求。
    注意：若 package.json 中出现 "type": "module"，需删除，否则 require 会报错。
 
 2. 编写 server.js
-   javascript
-   const express = require("express");
-   const app = express();
-
-const posts = Array.from({ length: 10 }, (\_, i) => ({
-id: i + 1,
-title: `文章标题 ${i + 1}`,
-body: `这是第 ${i + 1} 篇文章的正文内容...`
-}));
-
-app.get("/", (req, res) => {
-const now = new Date().toISOString(); // 时间戳证明每次请求都现拼 HTML
-
-const html = `<!DOCTYPE html>
-
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>SSR 文章列表</title>
-</head>
-<body>
-  <h1>文章列表</h1>
-  <p>服务器生成时间：${now}</p>
-  ${posts
-    .map(
-      (p) => `<article>
-        <h2>${p.title}</h2>
-        <p>${p.body}</p>
-      </article>`
-    )
-    .join("")}
-</body>
-</html>`;
-
-res.send(html);
-});
-
-app.listen(3000, () => {
-console.log("SSR on http://localhost:3000");
-}); 3. 运行并验证
-bash
-node server.js
-访问 http://localhost:3000：
 
 页面能看到 10 篇文章。
 
@@ -110,9 +69,8 @@ node server.js
 
 多次刷新，服务器生成时间 每次不同，证明 SSR 每次请求都现拼 HTML。
 
-https://images/ssr-page.png
-https://images/ssr-source.png
-https://images/ssr-time-change.png
+![SSR 页面](images/ssr-2.png)
+![SSR LCP](images/ssr-LCP.png)
 
 4. 适用场景及理由
    适用场景：电商详情页、个性化推荐、SEO 敏感页面。
@@ -126,53 +84,14 @@ https://images/ssr-time-change.png
    cd lab1-ssg
    pnpm init -y
 2. 编写 build-ssg.js
-   javascript
-   const fs = require("fs");
-
-const posts = Array.from({ length: 10 }, (\_, i) => ({
-id: i + 1,
-title: `文章标题 ${i + 1}`,
-body: `这是第 ${i + 1} 篇文章的正文内容...`
-}));
-
-const html = `<!DOCTYPE html>
-
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>SSG 文章列表</title>
-</head>
-<body>
-  <h1>文章列表</h1>
-  ${posts
-    .map(
-      (p) => `<article>
-        <h2>${p.title}</h2>
-        <p>${p.body}</p>
-      </article>`
-    )
-    .join("")}
-</body>
-</html>`;
-
-fs.mkdirSync("dist", { recursive: true });
-fs.writeFileSync("dist/index.html", html);
-
-console.log("静态页面已生成到 dist/"); 3. 生成并预览
-bash
-node build-ssg.js
-python -m http.server 8080 -d dist
-访问 http://localhost:8080：
-
-dist/index.html 生成成功。
 
 本地预览能访问，显示 10 篇文章。
 
 查看源代码，正文写死在 HTML 里；不重新构建，内容永不改变。
 
-https://images/ssg-page.png
-https://images/ssg-source.png
-https://images/ssg-dist.png
+![SSG 页面](images/ssg-1.png)
+
+![SSG LCP](images/ssg-LCP.png)
 
 4. 适用场景及理由
    适用场景：博客、官方文档、营销落地页。
@@ -194,9 +113,7 @@ CSR 268 字节 0.9 s 1.0 s 否 后台管理系统、重交互 SPA
 SSR 1004 字节 0.8 s 0.9 s 是 电商详情页、个性化推荐、SEO 敏感页面
 SSG 962 字节 1.0 s 1.0 s 是 博客、官方文档、营销落地页
 截图证据
-https://images/csr-lighthouse.png
-https://images/ssr-lighthouse.png
-https://images/ssg-lighthouse.png
+![HTML](images/HTML.png)
 
 数据分析
 HTML 大小：CSR 最小（268 字节），因为只有空壳和 JS 引用；SSR 最大（1004 字节），因为服务器每次拼接完整 HTML 返回；SSG 略小（962 字节），为构建时生成的纯静态文件。
@@ -241,4 +158,8 @@ SSR 返回的是静态 HTML，虽然内容可见，但没有事件监听和交�
 八、实验体会
 通过本次实验，我亲手实现了 CSR、SSR、SSG 三种渲染模式，直观感受到它们的工作流程差异。CSR 的“空壳”原理让我明白了 SPA SEO 差的根本原因；SSR 的时间戳实验让我确信服务器每次请求都重新拼 HTML；SSG 的构建脚本让我看穿了 Jekyll/Hugo 等静态生成器的本质。测量数据也验证了理论：SSR/SSG 首屏更快、SEO 更好，而 CSR 交互流畅但首屏依赖 JS。今后在做项目选型时，我会用“内容变不变、要不要个性化、首屏多敏感”三问来决策，不再盲目跟风。
 
-https://se3306csr-dp51w50bjn8o.edgeone.cool?eo_token=fdd7464e5efff5ddcb30fac99a7084b7&eo_time=1791377480
+六、部署链接
+模式 部署平台 访问地址
+CSR EdgeOne Pages https://se3306csr-dp51w50bjn8o.edgeone.cool?eo_token=fdd7464e5efff5ddcb30fac99a7084b7&eo_time=1791377480
+SSG EdgeOne Pages https://se3306ssg-dpcw7ejcgvqq.edgeone.cool?eo_token=5275953a35677e891b59b124fb39a351&eo_time=1791377759
+SSR CloudBase 云托管 https://se3306ssr-324435-10-1501558591.sh.run.tcloudbase.com
