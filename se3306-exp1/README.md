@@ -240,3 +240,5 @@ SSR 返回的是静态 HTML，虽然内容可见，但没有事件监听和交�
 
 八、实验体会
 通过本次实验，我亲手实现了 CSR、SSR、SSG 三种渲染模式，直观感受到它们的工作流程差异。CSR 的“空壳”原理让我明白了 SPA SEO 差的根本原因；SSR 的时间戳实验让我确信服务器每次请求都重新拼 HTML；SSG 的构建脚本让我看穿了 Jekyll/Hugo 等静态生成器的本质。测量数据也验证了理论：SSR/SSG 首屏更快、SEO 更好，而 CSR 交互流畅但首屏依赖 JS。今后在做项目选型时，我会用“内容变不变、要不要个性化、首屏多敏感”三问来决策，不再盲目跟风。
+
+https://se3306csr-dp51w50bjn8o.edgeone.cool?eo_token=fdd7464e5efff5ddcb30fac99a7084b7&eo_time=1791377480
